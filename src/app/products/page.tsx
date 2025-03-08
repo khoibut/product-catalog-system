@@ -1,6 +1,11 @@
-import Product from "@/components/Product";
+"use client";
 
+import Product from "@/components/Product";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 export default function Products() {
+    const products = useQuery(api.functions.queries.getProducts);
+    console.log(products);
     return (
         <>
             <div className="mt-15 font-body">
@@ -19,14 +24,14 @@ export default function Products() {
                     </div>
                     <div className="w-3/4">
                         <div className="grid grid-cols-[repeat(auto-fit,_minmax(16rem,_1fr))] gap-10">
-                            <Product />
-                            <Product />
-                            <Product />
-                            <Product />
-                            <Product />
-                            <Product />
-                            <Product />
-                            <Product />
+                            {products && products.map((product) => (
+                                <Product
+                                    key={product._id}
+                                    name={product.name}
+                                    gender={product.gender}
+                                    price={product.price}
+                                    image={product.image ?? null}/>
+                            ))}
                         </div>
                     </div>
                 </div>
