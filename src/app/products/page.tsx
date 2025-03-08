@@ -27,6 +27,7 @@ export default function Products() {
                             {products && products.map((product) => (
                                 <Product
                                     key={product._id}
+                                    id={product._id}
                                     name={product.name}
                                     gender={product.gender}
                                     price={product.price}

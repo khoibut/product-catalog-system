@@ -18,5 +18,14 @@ export default defineSchema({
         image: v.optional(v.string()),
         colors: v.array(v.string()),
         sizes: v.array(v.string()),
-    })
+    }),
+    carts: defineTable({
+        userId: v.id("users"),
+        items: v.array(v.id("cartItems")),
+    }). index("by_user", ["userId"]),
+    cartItems: defineTable({
+        cartId: v.id("carts"),
+        productId: v.id("products"),
+        quantity: v.number(),
+    }),
 });

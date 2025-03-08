@@ -16,12 +16,16 @@ export const authOptions = {
       async authorize(credentials) {
         if (!credentials) return null;
         try {
+          // Call your Convex login mutation to validate credentials.
           const user = await convex.mutation(api.users.login, {
             email: credentials.email,
             password: credentials.password,
           });
-          // Ensure your user object includes the username (or "name")
-          return { id: user.userId, name: user.name, email: user.email }; // { id, name, email }
+          return {
+            id: user.userId, // Map userId to id
+            name: user.name,
+            email: user.email,
+          }; // Ensure this returns an object that includes an "id" or "_id" property.
         } catch (error) {
           console.error("NextAuth authorize error:", error);
           return null;
@@ -30,16 +34,20 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account, profile, isNewUser }: { token: any, user?: any, account?: any, profile?: any, isNewUser?: boolean }) {
-      // On initial sign-in, user object is available. Store it in the token.
+    async jwt({ token, user }: { token: any; user?: any }) {
+      // On first sign-in, add user.id (or _id) to the token.
       if (user) {
-        token.user = user; // Add the full user object to the token
+        token.id = user.id || user._id;
       }
       return token;
     },
-    async session({ session, token }: { session: any, token: any }) {
-      // Attach the token's user data to the session
-      session.user = token.user as any;
+    async session({ session, token }: { session: any; token: any }) {
+      // Make the user id available in the session.
+      // We add a custom property "id" to session.user.
+      session.user = {
+        ...session.user,
+        id: token.id,
+      };
       return session;
     },
   },
