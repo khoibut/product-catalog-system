@@ -7,6 +7,20 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        // Using "*" as a wildcard allows any hostname with HTTPS.
+        // Note: This may have security implications.
+        hostname: "*",
+      },
+      {
+        protocol: "http",
+        hostname: "*",
+      },
+    ],
+  },
   // other Next.js config options here
 };
 
