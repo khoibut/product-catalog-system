@@ -12,6 +12,6 @@ export const getProduct = query({
     if (!product) {
       throw new Error("Product not found");
     }
-    return product;
+    return product
   },
 });

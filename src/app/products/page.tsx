@@ -3,8 +3,9 @@
 import Product from "@/components/Product";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { useAllProducts } from "@/services/productService";
 export default function Products() {
-    const products = useQuery(api.functions.queries.getProducts);
+    const products = useAllProducts();
     console.log(products);
     return (
         <>

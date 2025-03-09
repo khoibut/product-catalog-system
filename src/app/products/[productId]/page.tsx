@@ -7,70 +7,30 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useProduct } from "@/services/productService";
 function ProductPage() {
-    // Always call hooks at the top.
     const [quantity, setQuantity] = useState(1);
     const params = useParams();
     const { data: session } = useSession();
+    const username = session?.user?.name ?? "";
+    const convexProductId = params.productId as Id<"products">;
+    const product = useProduct(convexProductId);
     const addToCart = useMutation(api.functions.cart.addToCartByUsername);
-
-    // Extract the productId from params.
-    const productIdStr = Array.isArray(params.productId)
-        ? params.productId[0]
-        : params.productId;
-
-    // Convert productId string to a Convex Id (cast for now).
-    const convexProductId = productIdStr ? (productIdStr as Id<"products">) : undefined;
-
-
-    // Use query only if productId is available.
-    const product = useQuery(
-        api.functions.queries.getProduct,
-        convexProductId ? { productId: convexProductId } : "skip"
-    );
-
-    // Get user id from session.
-    const username = session?.user?.name;
-
-    // Loading states.
-    if (!productIdStr) {
-        return <div>Loading...</div>;
+    if(!product) return null;
+    function handleAddToCart() {
+        addToCart({ username, productId: convexProductId, quantity });
     }
-    if (!product) {
-        return <div>Loading product details...</div>;
-    }
-
-    // Handlers.
     function handleIncrement() {
         setQuantity((prev) => prev + 1);
     }
     function handleDecrement() {
         setQuantity((prev) => (prev > 1 ? prev - 1 : prev));
     }
-    async function handleAddToCart() {
-        if (!username) {
-            alert("Please log in to add items to your cart.");
-            return;
-        }
-        try {
-            const result = await addToCart({
-                username,
-                productId: convexProductId!,
-                quantity,
-            });
-            console.log("Added to cart:", result);
-            alert("Added to cart successfully.");
-        } catch (error: any) {
-            console.error("Error adding to cart:", error);
-            alert("Failed to add to cart.");
-        }
-    }
 
     return (
         <>
             <div className="mt-15 py-15 w-full flex justify-center gap-10">
                 <div className="w-1/3 bg-[#C4C4C4]">
-                    {/* Product image placeholder */}
                 </div>
                 <div>
                     <div className="flex items-center gap-5">

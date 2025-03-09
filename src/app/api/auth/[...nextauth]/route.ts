@@ -17,7 +17,7 @@ export const authOptions = {
         if (!credentials) return null;
         try {
           // Call your Convex login mutation to validate credentials.
-          const user = await convex.mutation(api.users.login, {
+          const user = await convex.mutation(api.functions.users.login, {
             email: credentials.email,
             password: credentials.password,
           });

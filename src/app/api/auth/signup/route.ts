@@ -15,7 +15,7 @@ export const POST = async (req: Request) => {
             );
         }
         
-        const response = await convex.mutation(api.users.signup, { name, email, password });
+        const response = await convex.mutation(api.functions.users.signup, { name, email, password });
         return new Response(JSON.stringify(response), { status: 200 });
     } catch (error: any) {
         console.error("Signup error:", error);
