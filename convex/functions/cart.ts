@@ -8,16 +8,64 @@ export const getCartItemsByUsername = query({
         const user = await db.query("users")
             .withIndex("by_name", q => q.eq("name", username))
             .unique();
+
         if (!user) {
-            throw new Error("User not found");
+            return [];
         }
+
         const cart = await db.query("carts")
             .withIndex("by_user", q => q.eq("userId", user._id))
             .unique();
+
         if (!cart) return [];
-        const items = await Promise.all(cart.items.map(cartItemId => db.get(cartItemId)));
+
+        const items = await db.query("cartItems")
+            .filter(q => q.eq(q.field("cartId"), cart._id))
+            .collect();
+
         return items;
     },
+});
+
+export const getCartItemsWithProducts = query({
+    args: { username: v.string() },
+    handler: async ({ db }, { username }) => {
+        const user = await db.query("users")
+            .withIndex("by_name", q => q.eq("name", username))
+            .unique();
+
+        if (!user) {
+            return [];
+        }
+
+        const cart = await db.query("carts")
+            .withIndex("by_user", q => q.eq("userId", user._id))
+            .unique();
+
+        if (!cart) return [];
+
+        const cartItems = await db.query("cartItems")
+            .filter(q => q.eq(q.field("cartId"), cart._id))
+            .collect();
+
+        if (cartItems.length === 0) return [];
+
+        const productIds = [...new Set(cartItems.map(item => item.productId))];
+
+        const products = await Promise.all(
+            productIds.map(id => db.get(id))
+        );
+
+        const productMap = new Map();
+        products.forEach(product => {
+            if (product) productMap.set(product._id, product);
+        });
+
+        return cartItems.map(item => ({
+            ...item,
+            product: productMap.get(item.productId) || null
+        }));
+    }
 });
 export const addToCartByUsername = mutation({
     args: {
